@@ -7,12 +7,13 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 
 # Set your source directory and predefined target directories here
-SOURCE_DIR = "/home/lain/Pictures/wallpapers"
+SOURCE_DIR = r"/path/to/source/images"
+
 PREDEFINED_DIRS = {
-    "Category 1": "/home/lain/Pictures/TEST",
-    "Category 2": "/path/to/target/category2",
-    "Category 3": "/path/to/target/category3",
-    "Category 4": "/path/to/target/category4"
+    "Category 1": r"/path/to/target/category1",
+    "Category 2": r"/path/to/target/category2",
+    "Category 3": r"/path/to/target/category3",
+    "Category 4": r"/path/to/target/category4"
 }
 # Define hotkeys for each category (must match PREDEFINED_DIRS order)
 CATEGORY_HOTKEYS = {
