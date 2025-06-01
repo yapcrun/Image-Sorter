@@ -14,17 +14,18 @@ A simple cross-platform PyQt6-based GUI tool to quickly sort images from a sourc
 
 1. **Set Source and Target Directories**
 
-   Edit the following variables at the top of [`sorter.py`](sorter.py):
+Edit the following variables at the top of [`sorter.py`](sorter.py):
 
-   ```python
-   SOURCE_DIR = "C:/users/lain/Pictures"
+```python
+SOURCE_DIR = r"/path/to/source/images"
 
-   PREDEFINED_DIRS = {
-       "Category 1": r"/path/to/target/category1",
-       "Category 2": r"/path/to/target/category2",
-       "Category 3": r"/path/to/target/category3",
-       "Category 4": r"/path/to/target/category4"
-   }
+PREDEFINED_DIRS = {
+    "Category 1": r"/path/to/target/category1",
+    "Category 2": r"/path/to/target/category2",
+    "Category 3": r"/path/to/target/category3",
+    "Category 4": r"/path/to/target/category4"
+}
+```
 
 2. **Define the hotkeys for each category**
 
@@ -32,21 +33,28 @@ Hotkey names **must** match category names!
 
 ```python
 CATEGORY_HOTKEYS = {
-    "Category 1": "1",
-    "Category 2": "2",
-    "Category 3": "3",
-    "Category 4": "4"
+ "Category 1": "1",
+ "Category 2": "2",
+ "Category 3": "3",
+ "Category 4": "4"
 }
-```
+````
 
 3. **Run the Application**
+
 ```bash
 python path/to/Image-Sorter/sorter.py
 ```
 
 ## Requirements
 
-**PIP**
+### System
+- Python3
+
+### Python/pip
+- PyQt6
+
+You can install PyQt6 by running.
 ```bash
 pip install PyQt6
 ```
