@@ -1,17 +1,18 @@
 import os
 import shutil
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QMainWindow, QFileDialog
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QMainWindow, QFileDialog, QDialog, QTableWidget, QTableWidgetItem
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 
 # Set your source directory and predefined target directories here
-SOURCE_DIR = r"/home/lain/Pictures/wallpapers"
+SOURCE_DIR = r"/path/to/source/directory"
 
+# Feel free to change category names (must also be changed in hotkeys below)
 PREDEFINED_DIRS = {
-    "Category 1": r"/home/lain/Pictures/wallpapers",
-    "Category 2": r"/home/lain/Pictures/wallpapers/test",
+    "Category 1": r"/path/to/target/category1",
+    "Category 2": r"/path/to/target/category2",
     "Category 3": r"/path/to/target/category3",
     "Category 4": r"/path/to/target/category4"
 }
@@ -23,10 +24,30 @@ CATEGORY_HOTKEYS = {
     "Category 4": "4"
 }
 SKIP_KEY = "s"  # Key to skip the current image
-
+UNDO_KEY = "z"  # key to undo last sorting operation
 
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp")
 
+
+class HistoryWindow(QDialog):
+    def __init__(self, history, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Sort History")
+        self.resize(600, 400)
+        self.layout = QVBoxLayout(self)
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(2)
+        self.table.setHorizontalHeaderLabels(["Source", "Destination"])
+        self.layout.addWidget(self.table)
+        self.setLayout(self.layout)
+        self.update_history(history)
+
+    def update_history(self, history):
+        self.table.setRowCount(len(history))
+        for row, (src, dst) in enumerate(history):
+            self.table.setItem(row, 0, QTableWidgetItem(src))
+            self.table.setItem(row, 1, QTableWidgetItem(dst))
+        self.table.resizeColumnsToContents()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -34,7 +55,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Image Sorter")
         self.image_files = self.get_image_files(SOURCE_DIR)
         self.current_index = 0
-        self.history = []  # To store (src, dst) tuples for undo
+        self.history = []  # To store (src, dst) tuples for undo & display
 
         # Widgets
         self.image_label = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
@@ -52,14 +73,19 @@ class MainWindow(QMainWindow):
             self.category_buttons.append((btn, hotkey, target_dir))
 
         # Add skip button
-        skip_btn = QPushButton("Skip (S)")
+        skip_btn = QPushButton(f"Skip ({SKIP_KEY})")
         skip_btn.clicked.connect(self.skip_image)
         self.skip_btn = skip_btn  # Store reference if needed
 
         # Add undo button
-        undo_btn = QPushButton("Undo")
+        undo_btn = QPushButton(f"Undo ({UNDO_KEY})")
         undo_btn.clicked.connect(self.undo_last)
         self.undo_btn = undo_btn
+
+        # Add history button
+        history_btn = QPushButton("Show History")
+        history_btn.clicked.connect(self.show_history)
+        self.history_btn = history_btn
 
         # Layout
         central_widget = QWidget()
@@ -68,11 +94,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.path_label)
         layout.addLayout(self.buttons_layout)
 
-        # Add skip and undo buttons in their own horizontal layout under the category buttons
+        # Add skip, undo, and history buttons in their own horizontal layout under the category buttons
         bottom_layout = QHBoxLayout()
         bottom_layout.addStretch()
         bottom_layout.addWidget(skip_btn)
         bottom_layout.addWidget(undo_btn)
+        bottom_layout.addWidget(history_btn)
         bottom_layout.addStretch()
         layout.addLayout(bottom_layout)
 
@@ -107,6 +134,7 @@ class MainWindow(QMainWindow):
             self.history.append((src, dst))  # Save for undo
             self.current_index += 1
             self.load_image()
+            self.update_history_window()
 
     def undo_last(self):
         if not self.history:
@@ -118,6 +146,7 @@ class MainWindow(QMainWindow):
             self.current_index = max(0, self.current_index - 1)
             self.image_files.insert(self.current_index, src)
             self.load_image()
+            self.update_history_window()
 
     def skip_image(self):
         if self.current_index < len(self.image_files):
@@ -126,6 +155,10 @@ class MainWindow(QMainWindow):
 
     def keyPressEvent(self, event):
         key = event.text().lower()
+        # Check for Ctrl+Z (undo)
+        if key == UNDO_KEY:
+            self.undo_last()
+            return
         # Check category hotkeys
         for btn, hotkey, target_dir in self.category_buttons:
             if hotkey and key == hotkey.lower():
@@ -134,6 +167,20 @@ class MainWindow(QMainWindow):
         # Skip hotkey
         if key == SKIP_KEY:
             self.skip_image()
+
+    def update_history_window(self):
+        # Update the history window if it's open
+        if hasattr(self, "history_window") and self.history_window.isVisible():
+            self.history_window.update_history(self.history)
+
+    def show_history(self):
+        if not hasattr(self, "history_window") or not self.history_window.isVisible():
+            self.history_window = HistoryWindow(self.history, self)
+        else:
+            self.history_window.update_history(self.history)
+        self.history_window.show()
+        self.history_window.raise_()
+        self.history_window.activateWindow()
 
 if __name__ == "__main__":
     import sys
