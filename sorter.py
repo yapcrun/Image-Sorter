@@ -7,11 +7,11 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 
 # Set your source directory and predefined target directories here
-SOURCE_DIR = r"/path/to/source/images"
+SOURCE_DIR = r"/home/lain/Pictures/wallpapers"
 
 PREDEFINED_DIRS = {
-    "Category 1": r"/path/to/target/category1",
-    "Category 2": r"/path/to/target/category2",
+    "Category 1": r"/home/lain/Pictures/wallpapers",
+    "Category 2": r"/home/lain/Pictures/wallpapers/test",
     "Category 3": r"/path/to/target/category3",
     "Category 4": r"/path/to/target/category4"
 }
@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Image Sorter")
         self.image_files = self.get_image_files(SOURCE_DIR)
         self.current_index = 0
+        self.history = []  # To store (src, dst) tuples for undo
 
         # Widgets
         self.image_label = QLabel(alignment=Qt.AlignmentFlag.AlignCenter)
@@ -50,10 +51,15 @@ class MainWindow(QMainWindow):
             self.buttons_layout.addWidget(btn)
             self.category_buttons.append((btn, hotkey, target_dir))
 
-        # Add skip button (will be placed in its own layout below)
+        # Add skip button
         skip_btn = QPushButton("Skip (S)")
         skip_btn.clicked.connect(self.skip_image)
         self.skip_btn = skip_btn  # Store reference if needed
+
+        # Add undo button
+        undo_btn = QPushButton("Undo")
+        undo_btn.clicked.connect(self.undo_last)
+        self.undo_btn = undo_btn
 
         # Layout
         central_widget = QWidget()
@@ -62,12 +68,13 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.path_label)
         layout.addLayout(self.buttons_layout)
 
-        # Add skip button in its own horizontal layout under the category buttons
-        skip_layout = QHBoxLayout()
-        skip_layout.addStretch()
-        skip_layout.addWidget(skip_btn)
-        skip_layout.addStretch()
-        layout.addLayout(skip_layout)
+        # Add skip and undo buttons in their own horizontal layout under the category buttons
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addStretch()
+        bottom_layout.addWidget(skip_btn)
+        bottom_layout.addWidget(undo_btn)
+        bottom_layout.addStretch()
+        layout.addLayout(bottom_layout)
 
         self.setCentralWidget(central_widget)
 
@@ -97,7 +104,19 @@ class MainWindow(QMainWindow):
             src = self.image_files[self.current_index]
             dst = os.path.join(target_dir, os.path.basename(src))
             shutil.move(src, dst)
+            self.history.append((src, dst))  # Save for undo
             self.current_index += 1
+            self.load_image()
+
+    def undo_last(self):
+        if not self.history:
+            return
+        src, dst = self.history.pop()
+        if os.path.exists(dst):
+            shutil.move(dst, src)
+            # After undo, show the undone image again
+            self.current_index = max(0, self.current_index - 1)
+            self.image_files.insert(self.current_index, src)
             self.load_image()
 
     def skip_image(self):
