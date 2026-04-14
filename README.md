@@ -1,69 +1,50 @@
 # Image Sorter
 
-A simple cross-platform PyQt6-based GUI tool to quickly sort images from a source directory into predefined category folders using buttons or keyboard shortcuts.
+A simple cross-platform PyQt6 GUI tool to quickly sort images from a source directory into predefined category folders using buttons or keyboard shortcuts.
 
 ## Features
 
 - Displays images from a source directory one by one.
 - Assign, undo, and skip images with a button or hotkey.
-- View a sortable history of all sort operations in a separate, non-blocking window.
-- Customizable source, target directories, and hotkeys.
+- View sort history in a separate, non-blocking window.
+- Configure source directory, category folders, and hotkeys from the app.
 - Supports common image formats: PNG, JPG, JPEG, BMP, GIF, WEBP.
 
 ## Usage
 
-1.**Set Source and Target Directories**
-
-Edit the following variables at the top of [`sorter.py`](sorter.py):
-
-```python
-SOURCE_DIR = r"/path/to/source/directory"
-
-PREDEFINED_DIRS = {
-    "Category 1": r"/path/to/target/category1",
-    "Category 2": r"/path/to/target/category2",
-    "Category 3": r"/path/to/target/category3",
-    "Category 4": r"/path/to/target/category4"
-}
-```
-
-2.**Define the hotkeys for each category**
-
-Hotkey names **must** match category names!
-
-```python
-CATEGORY_HOTKEYS = {
-    "Category 1": "1",
-    "Category 2": "2",
-    "Category 3": "3",
-    "Category 4": "4"
-}
-```
-
-3.**Run the Application**
+1. Run the application:
 
 ```bash
-python path/to/Image-Sorter/sorter.py
+python sorter.py
 ```
+
+2. On first launch, choose the source directory when prompted.
+
+3. Use the `Settings` menu to configure categories:
+   - `Configure Categories` lets you add/edit category names, target directories, and hotkeys.
+   - `Change Source Directory` lets you select a different source folder.
+
+4. Images will appear one at a time. Use the category buttons or hotkeys to move images to the target folder.
 
 ## Controls
 
-- **Category Buttons / Hotkeys:** Move the current image to the selected category. Use the button or press the assigned hotkey (e.g., <kbd>1</kbd>, <kbd>2</kbd>, etc.).
-- **Skip Button / Hotkey:** Skip the current image without moving it. Use the button or press <kbd>s</kbd>.
-- **Undo Button / Shortcut:** Undo the last sort operation. Use the button or press <kbd>Z</kbd>.
-- **Show History:** Opens a window showing a two-column table of all sort operations (source and destination).
+- **Category Buttons / Hotkeys:** Move the current image to the selected category.
+- **Skip Button / Hotkey:** Skip the current image without moving it. Press <kbd>s</kbd>.
+- **Undo Button / Shortcut:** Undo the last sort operation. Press <kbd>z</kbd>.
+- **Show History:** Opens a window showing a table of recent sort operations (source and destination).
+
+## Configuration
+
+The app stores settings in `settings.json` in the same folder as `sorter.py`.
+
+If the settings file is missing or invalid, the app falls back to default category placeholders.
 
 ## Requirements
 
-### System
-
 - Python 3.x
-
-### Python/pip
-
 - PyQt6
 
-Install with:
+Install PyQt6 with:
 
 ```bash
 pip install PyQt6
