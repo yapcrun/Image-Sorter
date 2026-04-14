@@ -128,23 +128,21 @@ class MainWindow(QMainWindow):
 
     def move_and_next(self, target_dir):
         if self.current_index < len(self.image_files):
-            src = self.image_files[self.current_index]
+            src = self.image_files.pop(self.current_index)
             dst = os.path.join(target_dir, os.path.basename(src))
             shutil.move(src, dst)
-            self.history.append((src, dst))  # Save for undo
-            self.current_index += 1
+            self.history.append((src, dst, self.current_index))  # Save for undo
             self.load_image()
             self.update_history_window()
 
     def undo_last(self):
         if not self.history:
             return
-        src, dst = self.history.pop()
+        src, dst, index = self.history.pop()
         if os.path.exists(dst):
             shutil.move(dst, src)
-            # After undo, show the undone image again
-            self.current_index = max(0, self.current_index - 1)
-            self.image_files.insert(self.current_index, src)
+            self.image_files.insert(index, src)
+            self.current_index = index
             self.load_image()
             self.update_history_window()
 
